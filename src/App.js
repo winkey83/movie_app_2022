@@ -1,45 +1,56 @@
 import React from "react";
+import axios from 'axios';
+import Movie from './Movie';
+import './App.css';
 
 class App extends React.Component {
   state={
-    count: 0,
+    isLoading: true,
+    movies: [],
   };
-
-  constructor(props) {
-    super(props);
-    console.log('AA: constructor');
+  getMovies = async () => {
+    const {
+      data: {
+        data: {
+          movies
+        },
+      },
+    } = await axios.get('https://yts-proxy.now.sh/list_movies.json?sort_by=rating');
+    this.setState({isLoading:false,movies});
   }
-
   componentDidMount() {
-    console.log('AA: componentDidMount');
+    this.getMovies();
   }
-
-  componentDidUpdate() {
-    console.log('AA: componentDidUpdate');
-  }
-
-  add = () => {
-    this.setState(current=>({
-      count: current.count+1
-    }));
-  };
-
-  subtract = () => {
-    this.setState(current=>({
-      count: current.count-1
-    }));
-  };
-
   render() {
-    console.log('AA: render');
+    const { isLoading, movies } = this.state;
     return (
-      <div>
-        <h1>BattleField:{this.state.count}</h1>
-        <button onClick={this.add}>Add</button>
-        <button onClick={this.subtract}>Subtract</button>
-      </div>
+      <section className="container">
+        {
+          isLoading?(
+            <div className="loader">
+              <span className="loader__text">Loading...</span>
+            </div>
+          ):(
+            <div className="movies">
+              {
+                movies.map(
+                  (movie)=>{
+                    return <Movie 
+                      key={movie.id}
+                      year={movie.year}
+                      title={movie.title}
+                      summary={movie.summary}
+                      poster={movie.medium_cover_image}
+                      genres={movie.genres}
+                    />;
+                  }
+                )
+              }
+            </div>
+          )
+        }
+      </section>
     );
   }
 }
-
 export default App;
